@@ -1,0 +1,213 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>fr.istic</groupId>
+  <artifactId>trombinoscope</artifactId>
+ <repositories>
+ 	<repository>
+            <id>bridjhack</id>
+            <url>http://maven.ecs.soton.ac.uk/content/repositories/thirdparty/</url>
+        </repository>
+ </repositories>
+  <version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<fully.qualified.main.class>fr.istic.trombistic.Trombistic</fully.qualified.main.class>
+		<xtend-gen-path>${basedir}/src/main/xtend-gen</xtend-gen-path>
+		
+		<xtend-version>2.9.2</xtend-version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
+
+	
+	<dependencies>
+
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.14.0</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>4.1.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>4.1.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>5.4.0</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>2.0.0-alpha1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>2.0.0-alpha1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>1.6.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>core</artifactId>
+			<version>3.4.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.xtend</groupId>
+			<artifactId>org.eclipse.xtend.lib</artifactId>
+			<version>2.24.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.emf</groupId>
+			<artifactId>org.eclipse.emf.ecore.xmi</artifactId>
+			<version>2.16.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.emf</groupId>
+			<artifactId>org.eclipse.emf.ecore.xcore.lib</artifactId>
+			<version>1.5.0</version>
+		</dependency>
+
+	
+		<!-- https://mvnrepository.com/artifact/com.github.sarxos/webcam-capture -->
+ 		<dependency>
+		    <groupId>com.github.sarxos</groupId>
+		    <artifactId>webcam-capture</artifactId>
+		    <version>0.3.12</version>
+		</dependency>
+<!-- <dependency>
+      <groupId>com.github.sarxos</groupId>
+      <artifactId>webcam-capture</artifactId>
+      <version>0.3.13-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.sarxos</groupId>
+      <artifactId>webcam-capture-driver-openimaj</artifactId>
+      <version>0.3.13-SNAPSHOT</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.openimaj</groupId>
+          <artifactId>core-video-capture</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+ -->    <dependency>
+      <groupId>com.nativelibs4java</groupId>
+      <artifactId>bridj</artifactId>
+      <version>0.7-20140918-3</version>
+    </dependency>
+    
+        		
+<dependency>
+    <groupId>com.github.lookfirst</groupId>
+    <artifactId>sardine</artifactId>
+    <version>5.10</version>
+</dependency>
+
+<dependency>
+    <groupId>org.apache.directory.studio</groupId>
+    <artifactId>org.apache.commons.io</artifactId>
+    <version>2.4</version>
+</dependency>
+				
+	</dependencies>
+
+	<build>
+		<finalName>Trombistic</finalName>
+		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+		<plugins>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${xtend-gen-path}</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.3.0</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>${fully.qualified.main.class}</mainClass>
+						</manifest>
+						<manifestEntries>
+							<Multi-Release>true</Multi-Release>
+						</manifestEntries>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.2.1</version>
+				<configuration>
+					<mainClass>${fully.qualified.main.class}</mainClass>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.21.0</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.junit.platform</groupId>
+						<artifactId>junit-platform-surefire-provider</artifactId>
+						<version>1.2.0-M1</version>
+					</dependency>
+					<dependency>
+						<groupId>org.junit.jupiter</groupId>
+						<artifactId>junit-jupiter-engine</artifactId>
+						<version>5.4.0</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+
+		</plugins>
+	</build>
+  
+</project>

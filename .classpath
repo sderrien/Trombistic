@@ -1,27 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="xtend-gen"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/bridj-0.6.2.jar"/>
-	<classpathentry kind="lib" path="lib/commons-cli-1.2.jar"/>
-	<classpathentry kind="lib" path="lib/commons-codec-1.9.jar"/>
-	<classpathentry kind="lib" path="lib/commons-io-2.5.jar"/>
-	<classpathentry kind="lib" path="lib/commons-logging-1.2.jar"/>
-	<classpathentry kind="lib" path="lib/fluent-hc-4.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/httpclient-4.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/httpclient-cache-4.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/httpclient-win-4.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/httpcore-4.4.6.jar"/>
-	<classpathentry kind="lib" path="lib/httpcore-ab-4.4.6.jar"/>
-	<classpathentry kind="lib" path="lib/httpcore-nio-4.4.6.jar"/>
-	<classpathentry kind="lib" path="lib/httpmime-4.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/jna-4.1.0.jar"/>
-	<classpathentry kind="lib" path="lib/jna-platform-4.1.0.jar"/>
-	<classpathentry kind="lib" path="lib/poi-3.14-20160307.jar"/>
-	<classpathentry kind="lib" path="lib/sardine-5.0.jar"/>
-	<classpathentry kind="lib" path="lib/slf4j-api-1.7.2.jar"/>
-	<classpathentry kind="lib" path="lib/webcam-capture-0.3.10.jar"/>
+	<classpathentry excluding="**" kind="src" output="target/classes" path="xtend-gen">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/main/xtend-gen"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11">
+		<attributes>
+			<attribute name="module" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.xtend.XTEND_CONTAINER"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>
