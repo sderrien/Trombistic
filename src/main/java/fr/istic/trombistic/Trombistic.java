@@ -84,6 +84,14 @@ public class Trombistic {
 		}
 		);
 
+		Webcam webcam = Webcam.getDefault();
+		
+		if (webcam!=null) {
+			if (!webcam.isOpen()) {
+				webcam.setViewSize(WebcamResolution.VGA.getSize());
+				webcam.open();
+			}
+		}
 		b2.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -132,21 +140,17 @@ public class Trombistic {
 			public void actionPerformed(ActionEvent e) {
 				String argx = null;
 				try {
+					new File(PHOTOS_PATH).mkdirs();
 					argx = PHOTOS_PATH + buildPhotoName(tableViewer); 
 					if (new File(argx).exists()) {
 						JOptionPane.showConfirmDialog(photo, "File " + argx + " will be overwritten, proceed ?");
 					}
 					//Webcam webcam = Webcam.getDefault(10);
-					for (Webcam wb : Webcam.getWebcams(10)) {
-						System.out.println("Webcam "+wb.getName());
-					}
-					Webcam webcam = Webcam.getDefault();
+//					for (Webcam wb : Webcam.getWebcams(10)) {
+//						System.out.println("Webcam "+wb.getName());
+//					}
 					
 					if (webcam!=null) {
-						if (!webcam.isOpen()) {
-							webcam.setViewSize(WebcamResolution.VGA.getSize());
-							webcam.open();
-						}
 						BufferedImage image = webcam.getImage();
 						try {
 							ImageIO.write(image, "PNG", new File(argx));
