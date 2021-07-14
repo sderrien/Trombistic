@@ -12,7 +12,10 @@ public class StudentTableModel extends AbstractTableModel {
 	}
 
 	public int getColumnCount() {
-		return donnees[0].length;
+		if (donnees.length!=0)
+			return donnees[0].length;
+		else 
+			return 0;
 	}
 
 	public Object getValueAt(int parm1, int parm2) {

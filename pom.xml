@@ -13,7 +13,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<fully.qualified.main.class>fr.istic.trombistic.Trombistic</fully.qualified.main.class>
+		<fully.qualified.main.class>fr.istic.trombistic.TrombisticFrame</fully.qualified.main.class>
 		<xtend-gen-path>${basedir}/src/main/xtend-gen</xtend-gen-path>
 		
 		<xtend-version>2.9.2</xtend-version>
@@ -115,12 +115,12 @@
         </exclusion>
       </exclusions>
     </dependency>
- -->    <dependency>
+   <dependency>
       <groupId>com.nativelibs4java</groupId>
       <artifactId>bridj</artifactId>
       <version>0.7-20140918-3</version>
     </dependency>
-    
+     --> 
         		
 <dependency>
     <groupId>com.github.lookfirst</groupId>

@@ -11,37 +11,36 @@ class PrettyPrint {
 	int nbcol = -1
 	int nbrow = -1
 	var names = new ArrayList<String>();
+	var emails = new ArrayList<String>();
 	var photos = new ArrayList<String>();
 	var set = new HashSet<String>;
 
-	def static void main(String[] args) {
-		val pp = new PrettyPrint();
-		pp.generate(new File(args.get(0)), 0, 2);
-	}
 
 	new() {
 	}
 
-	def generate(File file, int sheetId, int startCol) {
-		val ssheet = new ExcelModel(file);
+	def generate(File path, ExcelModel ssheet, int sheetId, int startCol) {
+		// search number of used columns
 		nbcol = 0
-		while (ssheet.getStringAt(sheetId, 1, nbcol) != null)
+		while (ssheet.getStringAt(sheetId, 1, nbcol) !== null)
 			nbcol++
-		nbrow = 0
+		
+		nbrow = 1
 		while (ssheet.getStringAt(sheetId, nbrow, 1) != null)
 			nbrow++
 		for (row : 0 .. nbrow - 1) {
 			val firstName = ssheet.getStringAt(sheetId, row, 0)
 			val secondName = ssheet.getStringAt(sheetId, row, 1)
 			names.add(
-				firstName + " " + secondName
+				firstName + " " + secondName  
 			);
+			emails.add(ssheet.getStringAt(sheetId, row, 2))
 			photos.add(ExcelModel.buildPhotoName(firstName, secondName));
 		}
 		for (col : startCol .. nbcol - 1) {
 			val title = ssheet.getStringAt(sheetId, 0, col);
 			println("New Column  :" + title)
-			var cnames = new ArrayList<String>()
+			var cnames = new ArrayList<Pair<String,String>>()
 			var cphotos = new ArrayList<String>()
 			set.clear
 			for (row : 1 .. nbrow - 1) {
@@ -56,23 +55,23 @@ class PrettyPrint {
 				cphotos.clear
 				for (row : 0 .. nbrow - 1) {
 					val ckey = ssheet.getStringAt(sheetId, row, col);
-					if (ckey == null) {
+					if (ckey === null) {
 						println('''null at cell («row»,«col»)''')
 					}
 					if (ckey == key) {
-						cnames.add(names.get(row))
+						cnames.add(names.get(row)->emails.get(row))
 						cphotos.add(photos.get(row));
 					}
 				}
 				println("saving " + key + ".htm with " + cnames.size + " students")
-				writeHTML("./html/" + key + ".htm", title + " " + key, cnames, cphotos);
+				writeHTML(new File(path.absolutePath+ File.separator+ key + ".htm"), title + " " + key, cnames, cphotos);
 			}
 		}
 	}
 
-	def writeHTML(String filename, String title, List<String> studentNames, List<String> photoFilames) {
+	def writeHTML(File file, String title, List<Pair<String,String>> studentNames, List<String> photoFilames) {
 
-		val ps = new PrintStream(new File(filename));
+		val ps = new PrintStream((file));
 		ps.append(
 		'''
 		<html><head><title>«title»</title>
@@ -91,7 +90,7 @@ class PrettyPrint {
 					<img src="photos/«photoFilames.get(i)»" height="200" onerror="this.onerror=null; this.src='photos/NoPhoto.jpg'" > 
 					</object>
 					</p>
-					<p align="center"> «studentNames.get(i)» </p>
+					<p align="center"> «studentNames.get(i).key» </br> <a href="mailto:«studentNames.get(i).value»"</a> «studentNames.get(i).value»</p>
 				</td>
 			''');
 		}

@@ -11,18 +11,32 @@ import javax.swing.JTable;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
-public class ExcelTableViewer extends JPanel {
+public class ExcelViewPanel extends JPanel {
 
-	private boolean DEBUG = false;
-
-	public ExcelTableViewer(File file) {
-		this(file, 0);
-	}
-
-	JTable table;
 	private JScrollPane scrollPane;
 	ListSelectionListener listener;
+	JTable table;
 
+	private TrombisticControl ctrl;
+ 
+	public ExcelViewPanel(TrombisticControl ctrl) {
+		super(new GridLayout(1, 0));
+		table = new JTable();
+		table.setModel(new DefaultTableModel());
+		table.setPreferredScrollableViewportSize(new Dimension(500, 300));
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		Color light_blue = new Color(205, 235, 255);
+		table.getTableHeader().setBackground(light_blue);
+		scrollPane = new JScrollPane(table);
+		scrollPane.setBackground(light_blue);
+		scrollPane.getViewport().setBackground(light_blue);
+		add(scrollPane);
+		this.ctrl = ctrl;
+		ctrl.setExcelViewPanel(this);
+		
+	}
+	
+	
 	public Object getCellAt(int row, int col) {
 		return table.getModel().getValueAt(row, col);
 	}
@@ -42,10 +56,9 @@ public class ExcelTableViewer extends JPanel {
 	public void addListSelectionListener(ListSelectionListener listener) {
 		this.listener = listener;
 		table.getSelectionModel().addListSelectionListener(listener);
-	}
+	}  
 
-	public void updateTable(File file, int sheetId) {
-		ExcelModel model = new ExcelModel(file);
+	public void updateTable(ExcelModel model, int sheetId)  {
 		int nbRows = model.getNumberOfUsefulRows(sheetId);
 		int nbCols = model.getNumberOfUsefulColumns(sheetId);
 		String[][] donnees = new String[nbRows][nbCols];
@@ -60,29 +73,10 @@ public class ExcelTableViewer extends JPanel {
 				donnees[row - 1][col] = model.getStringAt(sheetId, row, col);
 			}
 		}
-
 		StudentTableModel tableModel = new StudentTableModel(donnees, entete);
 		table.setModel(tableModel);
 		table.repaint();
-	}
-
-	public ExcelTableViewer(File file, int sheetId) {
-		super(new GridLayout(1, 0));
-
-		table = new JTable();
-		table.setModel(new DefaultTableModel());
-		table.setPreferredScrollableViewportSize(new Dimension(500, 300));
-		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		Color light_blue = new Color(205, 235, 255);
-		table.getTableHeader().setBackground(light_blue);
-		table.getSelectionModel().addListSelectionListener(listener);
-		scrollPane = new JScrollPane(table);
-		scrollPane.setBackground(light_blue);
-		scrollPane.getViewport().setBackground(light_blue);
-		add(scrollPane);
-
-		updateTable(file, sheetId);
-
+		this.repaint();
 	}
 
 }
