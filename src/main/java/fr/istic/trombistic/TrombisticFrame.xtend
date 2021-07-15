@@ -17,6 +17,7 @@ import java.awt.event.ActionEvent
 import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JFileChooser
+import java.util.prefs.Preferences
 
 class TrombisticFrame extends JFrame {
 
@@ -40,6 +41,10 @@ class TrombisticFrame extends JFrame {
 	}
 
 	def private void createMenuBar() {
+
+    // Retrieve the user's preference node for this package
+    	val prefs = Preferences.userNodeForPackage(this.class);
+
 		var menuBar = new JMenuBar()
 		var exitIcon = new ImageIcon("src/resources/exit.png")
 

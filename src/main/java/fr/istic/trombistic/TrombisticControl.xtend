@@ -43,7 +43,7 @@ class TrombisticControl {
 	}
 
 	def setStudent(int i) {
-		selectedRow = i+1
+		selectedRow = i + 1
 		val photoFileNane = photoPath.absolutePath + File.separator + buildPhotoName()
 		photoPanel.setImage(photoFileNane)
 		mainFrame.repaint
@@ -55,7 +55,7 @@ class TrombisticControl {
 			JOptionPane::showMessageDialog(mainFrame, '''Please select an row first'''.toString)
 			return
 		}
-		val photoFileNane = photoPath + File.separator+ buildPhotoName()
+		val photoFileNane = photoPath + File.separator + buildPhotoName()
 		if (new File(photoFileNane).exists()) {
 			JOptionPane::showConfirmDialog(mainFrame,
 				'''File «photoFileNane» will be overwritten, proceed ?'''.toString)
@@ -105,13 +105,13 @@ class TrombisticControl {
 		val excel97Filter = new FileTypeFilter(".xls", "Excel 97 files ");
 		fileChooser.addChoosableFileFilter(excel97Filter);
 		var int result = fileChooser.showOpenDialog(mainFrame)
-		//if (result === JFileChooser::APPROVE_OPTION) {
+		// if (result === JFileChooser::APPROVE_OPTION) {
 		excelFile = fileChooser.getSelectedFile()
-		if (excelFile!==null) {
+		if (excelFile !== null) {
 			model = new ExcelModel(excelFile)
 			excelView.updateTable(model, sheetId);
 			mainFrame.repaint
-		}	
+		}
 		mainFrame.repaint
 	}
 
@@ -132,4 +132,42 @@ class TrombisticControl {
 	def setExcelViewPanel(ExcelViewPanel label) {
 		this.excelView = label
 	}
+
+	def importPicture() {
+		photoPath.mkdirs()
+		if (selectedRow < 0) {
+			JOptionPane::showMessageDialog(mainFrame, '''Please select an row first'''.toString)
+			return
+		}
+		val photoFileNane = photoPath + File.separator + buildPhotoName()
+		if (new File(photoFileNane).exists()) {
+			JOptionPane::showConfirmDialog(mainFrame,
+				'''File «photoFileNane» will be overwritten, proceed ?'''.toString)
+		}
+		var JFileChooser fileChooser = new JFileChooser("./")
+		fileChooser.setName("Select picture file (jpg,png)")
+		val pngFilter = new FileTypeFilter(".png,", "PNG file");
+		val jpgFilter = new FileTypeFilter(".jpg,", "JPEG file");
+		fileChooser.addChoosableFileFilter(pngFilter);
+		fileChooser.addChoosableFileFilter(jpgFilter);
+		var int result = fileChooser.showOpenDialog(mainFrame)
+		val inFile = fileChooser.getSelectedFile()
+		if (inFile !== null) {
+			try {
+				val image = ImageIO::read(inFile)
+				ImageIO::write(image, "PNG", new File(photoFileNane))
+ 				if ((new File(photoFileNane).exists())) { 
+					photoPanel.setImage(photoFileNane)
+ 				} else {
+					JOptionPane::showMessageDialog(mainFrame, '''Hmm something unexpected happened.''')
+ 				}
+					
+			
+			} catch (IOException e2) {
+				JOptionPane::showMessageDialog(mainFrame, '''Could not read/save file «photoFileNane»'''.toString)
+			}
+		}
+		mainFrame.repaint
+	}
+
 }
