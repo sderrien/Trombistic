@@ -1,21 +1,26 @@
 package fr.istic.trombistic
 
-import javax.swing.JPanel
-import java.awt.FlowLayout
-import javax.swing.BorderFactory
 import java.awt.Dimension
-import java.awt.image.BufferedImage
-import javax.swing.JLayer
-import javax.swing.JLabel
-import javax.swing.JButton
+import java.awt.FlowLayout
+import java.awt.Graphics
 import java.awt.event.ActionEvent
-import javax.swing.BoxLayout
-import javax.swing.border.TitledBorder
+import java.awt.image.BufferedImage
 import java.io.File
+import javax.swing.BorderFactory
+import javax.swing.BoxLayout
+import javax.swing.ImageIcon
+import javax.swing.JButton
+import javax.swing.JLabel
+import javax.swing.JLayer
 import javax.swing.JOptionPane
+import javax.swing.JPanel
+import javax.swing.border.TitledBorder
+import java.awt.Color
+import java.awt.Image
 
 class PhotoPanel extends JPanel {
 
+	static final String DEFAULT_PHOTO = "./src/main/java/fr/istic/trombistic/aucun.png"
 	PhotoLabel photo
 	JButton shootButton
 	JButton assignButton
@@ -25,20 +30,25 @@ class PhotoPanel extends JPanel {
 	TitledBorder paneBorder
 
 	def disableShootButton() {
-		shootButton.visible = false
+		shootButton.enabled=false 
 	}
 
 	def enableShootButton() {
-		shootButton.visible = true
+		shootButton.enabled= true
 	}
 
 	new(TrombisticControl ctrl) {
 		super()
-		setSize(400, 400)
+		setSize(500, 700)
 		paneBorder = BorderFactory::createTitledBorder("Photo")
+		
 		setBorder(paneBorder)
 		layout = new FlowLayout(FlowLayout::CENTER)
-		photo = new PhotoLabel()
+		val photoPanel = new JPanel();
+		photo= new PhotoLabel(300,500)
+		photoPanel.add(photo)
+		add(photoPanel)
+		
 		add(photo)
 		shootButton = new JButton("Shoot picture")
 		assignButton = new JButton("Import picture")
@@ -47,7 +57,7 @@ class PhotoPanel extends JPanel {
 		disableShootButton
 		this.ctrl = ctrl
 		ctrl.setPhotoPanel(this)
-
+		image="undefined"
 		shootButton.addActionListener([ActionEvent e|ctrl.shootPicture])
 		assignButton.addActionListener([ActionEvent e|ctrl.importPicture])
 	}
@@ -57,13 +67,12 @@ class PhotoPanel extends JPanel {
 	}
 
 	def setImage(String string) {
+		paneBorder.title = string
 		if ((new File(string).exists())) {
-			paneBorder.title = string
 			photo.image = string
 		} else {
-			photo.image = "./src/main/java/fr/istic/trombistic/aucun.png"
+			photo.image = DEFAULT_PHOTO
 		}
-
 	}
 
 }

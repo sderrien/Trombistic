@@ -1,8 +1,7 @@
 package fr.istic.trombistic
 
 import com.github.sarxos.webcam.Webcam
-import java.io.File
-import javax.swing.JTable
+import java.io.File 
 import java.text.Normalizer
 import javax.swing.JOptionPane
 import java.awt.image.BufferedImage
@@ -10,11 +9,15 @@ import javax.imageio.ImageIO
 import java.io.IOException
 import javax.swing.JFileChooser
 import com.github.sarxos.webcam.WebcamResolution
+import java.nio.file.Paths
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 
 class TrombisticControl {
 	TrombisticFrame mainFrame
 	Webcam webcam
-	File photoPath
+	File workingPath
 	File excelFile;
 	int sheetId;
 	ExcelModel model;
@@ -27,7 +30,7 @@ class TrombisticControl {
 		this.mainFrame = mainFrame
 		sheetId = 0
 		excelFile = null
-		photoPath = new File("./")
+		workingPath = new File("./")
 	}
 
 	def setWebCam(int id) {
@@ -44,18 +47,20 @@ class TrombisticControl {
 
 	def setStudent(int i) {
 		selectedRow = i + 1
-		val photoFileNane = photoPath.absolutePath + File.separator + buildPhotoName()
+		val photoFileNane = buildSelectedPhotoFilePath()
 		photoPanel.setImage(photoFileNane)
 		mainFrame.repaint
 	}
 
 	def shootPicture() {
-		photoPath.mkdirs()
+		if (!workingPath.exists) {
+			workingPath.mkdirs()
+		}
 		if (selectedRow < 0) {
 			JOptionPane::showMessageDialog(mainFrame, '''Please select an row first'''.toString)
 			return
 		}
-		val photoFileNane = photoPath + File.separator + buildPhotoName()
+		val photoFileNane = buildSelectedPhotoFilePath()
 		if (new File(photoFileNane).exists()) {
 			JOptionPane::showConfirmDialog(mainFrame,
 				'''File «photoFileNane» will be overwritten, proceed ?'''.toString)
@@ -80,39 +85,59 @@ class TrombisticControl {
 		return Normalizer::normalize(src, Normalizer::Form::NFD).replaceAll("[̀-ͯ]", "")
 	}
 
-	def String buildPhotoName() {
+	def String buildSelectedPhotoFilePath() {
+		return workingPath + File.separator + "photos"+ File.separator  + buildPhotoFileName(model.getStringAt(sheetId,selectedRow, 0),model.getStringAt(sheetId,selectedRow, 1))
+	}
 
-		return ('''«removeAccent((model.getStringAt(sheetId,selectedRow, 0)))»_«removeAccent((model.getStringAt(sheetId,selectedRow, 1)))».png'''.
+	def String buildPhotoFileName(String firstName, String secondName) {
+		return ('''«removeAccent(firstName)»_«removeAccent(secondName)».png'''.
 			toString).replace("'", "-")
 	}
 
+	
 	def exportHTML() {
-
-		var JFileChooser fileChooser = new JFileChooser("./")
-		fileChooser.setName("Select Output folder)")
-		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		var int result = fileChooser.showOpenDialog(mainFrame)
-		if (result === JFileChooser::APPROVE_OPTION) {
-			var PrettyPrint pp = new PrettyPrint()
-			val outFolder = fileChooser.getSelectedFile()
-			pp.generate(outFolder, model, sheetId, 3)
+		var PrettyPrint pp = new PrettyPrint()
+		val outFolder = new File(workingPath.absolutePath+File.separator+"html")
+		if (!outFolder.exists) {
+			outFolder.mkdirs()
 		}
+		val photoFolder = new File( outFolder.absolutePath + File.separator + "photos")
+		if (!photoFolder.exists) {
+			photoFolder.mkdirs()
+		}
+		println("Found "+model.getNumberOfUsefulRows(0)+" useful rows")
+		for (i:0..<model.getNumberOfUsefulRows(0)) {
+			val srcImage = workingPath + File.separator  + "photos"+ File.separator + buildPhotoFileName(model.getFirstName(i),model.getSecondName(i))
+			if (new File(srcImage).exists) {
+				val dstImage = photoFolder.absolutePath + File.separator + buildPhotoFileName(model.getFirstName(i),model.getSecondName(i))
+				val Path original = Paths.get(srcImage);
+    			val Path copy = Paths.get(dstImage);
+    			Files.copy(original, copy, StandardCopyOption.REPLACE_EXISTING);
+			}
+		}
+		pp.generate(outFolder, model, sheetId, 3)
+		JOptionPane::showMessageDialog(mainFrame, '''Export successful.''')
+		
 	}
 
-	def loadExcel() {
+	def loadExcelCommand() {
 		var JFileChooser fileChooser = new JFileChooser("./")
-		fileChooser.setName("Select Excel file (.xls)")
+		fileChooser.setName("Select Excel 97 file (.xls)")
 		val excel97Filter = new FileTypeFilter(".xls", "Excel 97 files ");
 		fileChooser.addChoosableFileFilter(excel97Filter);
-		var int result = fileChooser.showOpenDialog(mainFrame)
-		// if (result === JFileChooser::APPROVE_OPTION) {
+		fileChooser.showOpenDialog(mainFrame)
 		excelFile = fileChooser.getSelectedFile()
-		if (excelFile !== null) {
+		loadExcel(excelFile)
+		mainFrame.repaint
+	}
+
+	def loadExcel(File excelFile) {
+		if (excelFile !== null && excelFile.exists) {
 			model = new ExcelModel(excelFile)
 			excelView.updateTable(model, sheetId);
+			workingPath = new File(excelFile.absolutePath).parentFile
 			mainFrame.repaint
-		}
-		mainFrame.repaint
+		} 
 	}
 
 	def reloadExcel() {
@@ -121,25 +146,27 @@ class TrombisticControl {
 			excelView.updateTable(model, sheetId);
 			mainFrame.repaint
 		} else {
-			JOptionPane::showMessageDialog(mainFrame, '''Please opne excel file first''')
+			JOptionPane::showMessageDialog(mainFrame, '''Please select an Excel file first''')
 		}
 	}
 
 	def setPhotoPanel(PhotoPanel label) {
 		photoPanel = label
 	}
-
+	
 	def setExcelViewPanel(ExcelViewPanel label) {
 		this.excelView = label
 	}
 
 	def importPicture() {
-		photoPath.mkdirs()
+		if (!workingPath.exists) {
+			workingPath.mkdirs()
+		}
 		if (selectedRow < 0) {
 			JOptionPane::showMessageDialog(mainFrame, '''Please select an row first'''.toString)
 			return
 		}
-		val photoFileNane = photoPath + File.separator + buildPhotoName()
+		val photoFileNane = buildSelectedPhotoFilePath()
 		if (new File(photoFileNane).exists()) {
 			JOptionPane::showConfirmDialog(mainFrame,
 				'''File «photoFileNane» will be overwritten, proceed ?'''.toString)
@@ -150,7 +177,7 @@ class TrombisticControl {
 		val jpgFilter = new FileTypeFilter(".jpg,", "JPEG file");
 		fileChooser.addChoosableFileFilter(pngFilter);
 		fileChooser.addChoosableFileFilter(jpgFilter);
-		var int result = fileChooser.showOpenDialog(mainFrame)
+		 fileChooser.showOpenDialog(mainFrame)
 		val inFile = fileChooser.getSelectedFile()
 		if (inFile !== null) {
 			try {
@@ -161,8 +188,6 @@ class TrombisticControl {
  				} else {
 					JOptionPane::showMessageDialog(mainFrame, '''Hmm something unexpected happened.''')
  				}
-					
-			
 			} catch (IOException e2) {
 				JOptionPane::showMessageDialog(mainFrame, '''Could not read/save file «photoFileNane»'''.toString)
 			}

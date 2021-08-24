@@ -18,6 +18,7 @@ import javax.swing.JLabel
 import javax.swing.JOptionPane
 import javax.swing.JFileChooser
 import java.util.prefs.Preferences
+import java.io.File
 
 class TrombisticFrame extends JFrame {
 
@@ -30,6 +31,12 @@ class TrombisticFrame extends JFrame {
 		ctrl = new TrombisticControl(this)
 		initUI()
 		createMenuBar
+		
+	}
+
+	new(String excelfile) {
+		this()
+		ctrl.loadExcel(new File(excelfile))
 	}
 
 	def private void initUI() {
@@ -51,12 +58,12 @@ class TrombisticFrame extends JFrame {
 		var fileMenu = new JMenu("File")
 		fileMenu.setMnemonic(KeyEvent::VK_F)
 
-		var loadMenuItem = new JMenuItem("Load file")
+		var loadMenuItem = new JMenuItem("Load excel file")
 		loadMenuItem.setMnemonic(KeyEvent::VK_F2)
 		fileMenu.add(loadMenuItem)
-		loadMenuItem.addActionListener([ActionEvent e|ctrl.loadExcel] as ActionListener)
+		loadMenuItem.addActionListener([ActionEvent e|ctrl.loadExcelCommand] as ActionListener)
 
-		var reloadMenuItem = new JMenuItem("Reload")
+		var reloadMenuItem = new JMenuItem("Reload excel file")
 		reloadMenuItem.setMnemonic(KeyEvent::VK_F5)
 		fileMenu.add(reloadMenuItem)
 		reloadMenuItem.addActionListener([ActionEvent e|ctrl.reloadExcel] as ActionListener)
@@ -126,7 +133,10 @@ class TrombisticFrame extends JFrame {
 	}
 
 	def static void main(String[] args) {
+		if (args.size==0)
 		new TrombisticFrame()
+		else
+		new TrombisticFrame(args.head)
 
 	}
 }

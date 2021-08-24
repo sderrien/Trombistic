@@ -80,6 +80,10 @@ class PrettyPrint {
 		<h1 align="center">«title»</h1>
 		<table align="center" border="1"><tr>
 		</tr>
+		
+		<p align="center" > <a href="mailto:«(0..<studentNames.size).map[studentNames.get(it).value].filterNull.reduce[p1, p2|p1+","+p2]»"</a> tous </p>
+		
+		<a href="mailto:«(0..<studentNames.size).map[studentNames.get(it).value].reduce[p1, p2|p1+","+p2]»"</a>
 		<tr>''')
 		for (i : 0 .. studentNames.size - 1) {
 			if(i % 4 == 0) ps.append("</tr><tr>")

@@ -37,7 +37,19 @@ class ExcelModel {
 		}
 		i
 	}
-
+	
+	def getFirstName(int rowId) {
+		getStringAt(0,rowId,0)
+	}
+	
+	def getSecondName(int rowId) {
+		getStringAt(0,rowId,1)
+	}
+	
+	def getEmailAddress(int rowId) {
+		getStringAt(0,rowId,2)
+	}
+	
 	def getStringAt(int sheetId, int rowId, int colId) {
 		var HSSFSheet sheet = workbook.getSheetAt(sheetId);
 		val crow = sheet.getRow(rowId);
