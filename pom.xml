@@ -1,30 +1,116 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>fr.istic</groupId>
-  <artifactId>trombinoscope</artifactId>
- <repositories>
- 	<repository>
-            <id>bridjhack</id>
-            <url>http://maven.ecs.soton.ac.uk/content/repositories/thirdparty/</url>
-        </repository>
- </repositories>
-  <version>0.0.1-SNAPSHOT</version>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>fr.istic</groupId>
+	<artifactId>trombinoscope</artifactId>
+
+
+	<repositories>
+		<repository>
+			<id>bridjhack</id>
+			<url>https://maven.ecs.soton.ac.uk/content/repositories/thirdparty/</url>
+		</repository>
+    <repository>
+        <id>Sonatype OSS Snapshot Repository</id>
+        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </repository>
+
+     <repository>
+      <id>openimaj-maven</id>
+      <url>http://maven.openimaj.org/</url>
+    </repository>
+    <repository>
+      <id>openimaj-snapshots</id>
+      <url>http://snapshots.openimaj.org/</url>
+    </repository>   <repository>
+        <id>mavenCentral()</id>
+        <url>https://maven.ecs.soton.ac.uk/content/groups/maven.openimaj.org/</url>
+    </repository>
+	</repositories>
+	<version>0.0.6-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<fully.qualified.main.class>fr.istic.trombistic.TrombisticFrame</fully.qualified.main.class>
+		<fully.qualified.main.class>fr.istic.trombistic.TrombisticMain</fully.qualified.main.class>
 		<xtend-gen-path>${basedir}/src/main/xtend-gen</xtend-gen-path>
-		
+
 		<xtend-version>2.9.2</xtend-version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
+		<opencv.version>3.4.2-0</opencv.version>
+	<openimaj.version>1.4-SNAPSHOT</openimaj.version>
 	</properties>
 
-	
+
 	<dependencies>
 
+     <dependency>
+      <groupId>org.openimaj</groupId>
+      <artifactId>faces</artifactId>
+      <version>${openimaj.version}</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.openimaj</groupId>
+          <artifactId>klt-tracker</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.openimaj</groupId>
+          <artifactId>FaceTracker</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>net.sourceforge.jeuclid</groupId>
+          <artifactId>jeuclid-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>uk.ac.ed.ph.snuggletex</groupId>
+          <artifactId>snuggletex-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>uk.ac.ed.ph.snuggletex</groupId>
+          <artifactId>snuggletex-upconversion</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>uk.ac.ed.ph.snuggletex</groupId>
+          <artifactId>snuggletex-jeuclid</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.openimaj</groupId>
+          <artifactId>core-experiment</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.openimaj</groupId>
+          <artifactId>machine-learning</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  		<dependency>
+			<groupId>com.github.sarxos</groupId>
+			<artifactId>webcam-capture</artifactId>
+			<version>0.3.13-SNAPSHOT</version>
+		</dependency>
+
 		<dependency>
+			<groupId>com.github.sarxos</groupId>
+			<artifactId>webcam-capture-driver-openimaj</artifactId>
+			<version>0.3.13-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.openimaj</groupId>
+					<artifactId>core-video-capture</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>com.nativelibs4java</groupId>
+			<artifactId>bridj</artifactId>
+			<version>0.7-20140918-3</version>
+		</dependency>
+
+			<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
 			<version>2.14.0</version>
@@ -62,17 +148,6 @@
 			<version>2.0.0-alpha1</version>
 		</dependency>
 
-		<dependency>
-			<groupId>com.sun.mail</groupId>
-			<artifactId>javax.mail</artifactId>
-			<version>1.6.0</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.zxing</groupId>
-			<artifactId>core</artifactId>
-			<version>3.4.0</version>
-		</dependency>
 
 		<dependency>
 			<groupId>org.eclipse.xtend</groupId>
@@ -81,65 +156,25 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.eclipse.emf</groupId>
-			<artifactId>org.eclipse.emf.ecore.xmi</artifactId>
-			<version>2.16.0</version>
+			<groupId>org.apache.directory.studio</groupId>
+			<artifactId>org.apache.commons.io</artifactId>
+			<version>2.4</version>
 		</dependency>
-
-		<dependency>
-			<groupId>org.eclipse.emf</groupId>
-			<artifactId>org.eclipse.emf.ecore.xcore.lib</artifactId>
-			<version>1.5.0</version>
-		</dependency>
-
-	
-		<!-- https://mvnrepository.com/artifact/com.github.sarxos/webcam-capture -->
- 		<dependency>
-		    <groupId>com.github.sarxos</groupId>
-		    <artifactId>webcam-capture</artifactId>
-		    <version>0.3.12</version>
-		</dependency>
-<!-- <dependency>
-      <groupId>com.github.sarxos</groupId>
-      <artifactId>webcam-capture</artifactId>
-      <version>0.3.13-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>com.github.sarxos</groupId>
-      <artifactId>webcam-capture-driver-openimaj</artifactId>
-      <version>0.3.13-SNAPSHOT</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.openimaj</groupId>
-          <artifactId>core-video-capture</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-   <dependency>
-      <groupId>com.nativelibs4java</groupId>
-      <artifactId>bridj</artifactId>
-      <version>0.7-20140918-3</version>
-    </dependency>
-     --> 
-        		
-<dependency>
-    <groupId>com.github.lookfirst</groupId>
-    <artifactId>sardine</artifactId>
-    <version>5.10</version>
-</dependency>
-
-<dependency>
-    <groupId>org.apache.directory.studio</groupId>
-    <artifactId>org.apache.commons.io</artifactId>
-    <version>2.4</version>
-</dependency>
-				
+		
 	</dependencies>
 
 	<build>
 		<finalName>Trombistic</finalName>
 		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
 		<plugins>
+
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<release>8</release>
+				</configuration>
+			</plugin>
 
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -208,6 +243,20 @@
 			</plugin>
 
 		</plugins>
+		
+		<resources>
+     <resource>
+       <directory>./images</directory>
+       <includes><include>*.*</include></includes>
+     </resource>
+   </resources>
 	</build>
-  
+	  <distributionManagement>
+	    <repository>
+	      <id>github</id>
+	      <name>GitHub Packages</name>
+	      <url>https://www.github.com/sderrien/Trombistic</url>
+	    </repository>
+	  </distributionManagement>
+
 </project>

@@ -144,8 +144,8 @@ class TrombisticControl {
 
 	def loadExcelCommand() {
 		var JFileChooser fileChooser = new JFileChooser("./")
-		fileChooser.setName("Select Excel file (.xlsx)")
-		val excelFilter = new FileTypeFilter(".xlsx", "Excel files ");
+		fileChooser.setName("Select Excel file (.xls)")
+		val excelFilter = new FileTypeFilter(".xls", "Excel files ");
 		for (f : fileChooser.choosableFileFilters)
 			fileChooser.removeChoosableFileFilter(f)
 		fileChooser.addChoosableFileFilter(excelFilter);
