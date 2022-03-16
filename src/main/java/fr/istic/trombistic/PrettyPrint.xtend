@@ -35,7 +35,7 @@ class PrettyPrint {
 				firstName + " " + secondName  
 			);
 			emails.add(ssheet.getStringAt(sheetId, row, 2))
-			photos.add(ExcelModel.buildPhotoName(firstName, secondName));
+			photos.add(ProjectDescriptionGen.buildPhotoName(firstName, secondName));
 		}
 		for (col : startCol .. nbcol - 1) {
 			val title = ssheet.getStringAt(sheetId, 0, col);
@@ -74,11 +74,17 @@ class PrettyPrint {
 		val ps = new PrintStream((file));
 		ps.append(
 		'''
+		<!DOCTYPE html>
+		<html>
+		<head>
+		<link rel="stylesheet" href="trombistic.css">
+		</head>
+		<body>
 		<html><head><title>«title»</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		<body bgcolor="#FFFFFF" text="#000000">
 		<h1 align="center">«title»</h1>
-		<table align="center" border="1"><tr>
+		<table align="center" border="0"><tr>
 		</tr>
 		
 		<p align="center" > <a href="mailto:«(0..<studentNames.size).map[studentNames.get(it).value].filterNull.reduce[p1, p2|p1+","+p2]»"</a> tous </p>

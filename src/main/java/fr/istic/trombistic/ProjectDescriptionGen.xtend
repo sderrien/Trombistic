@@ -11,15 +11,16 @@ import org.apache.poi.hssf.usermodel.HSSFSheet
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.Cell
 import java.util.ArrayList
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
-class ExcelModel {
+class ProjectDescriptionGen {
 
-	var HSSFWorkbook workbook;
+	var XSSFWorkbook workbook;
 	File file;
 
 	new(File f) {
 		file = f;
-		workbook = new HSSFWorkbook(new FileInputStream(file));
+		workbook = new XSSFWorkbook(new FileInputStream(file));
 	}
 
 	def getNumberOfUsefulColumns(int sheedId) {
@@ -32,7 +33,7 @@ class ExcelModel {
 
 	def getNumberOfUsefulRows(int sheedId) {
 		var i = 0
-		while (getStringAt(sheedId, i, 0) != null && getStringAt(sheedId, i, 0) != "") {
+		while (getStringAt(sheedId, i, 0) !== null && getStringAt(sheedId, i, 0) != "") {
 			i++
 		}
 		i
@@ -51,7 +52,7 @@ class ExcelModel {
 	}
 	
 	def getStringAt(int sheetId, int rowId, int colId) {
-		var HSSFSheet sheet = workbook.getSheetAt(sheetId);
+		var  sheet = workbook.getSheetAt(sheetId);
 		val crow = sheet.getRow(rowId);
 		if (crow != null) {
 			val cell = crow.getCell(colId);
@@ -63,7 +64,7 @@ class ExcelModel {
 	}
 
 	def setStringAt(int sheetId, int rowId, int colId, String content) {
-		var HSSFSheet sheet = workbook.getSheetAt(sheetId);
+		var  sheet = workbook.getSheetAt(sheetId);
 		val crow = sheet.getRow(rowId);
 		val cell = crow.getCell(colId);
 		cell.cellValue = content

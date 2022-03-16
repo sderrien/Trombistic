@@ -20,7 +20,7 @@ import javax.swing.JFileChooser
 import java.util.prefs.Preferences
 import java.io.File
 
-class TrombisticFrame extends JFrame {
+class TrombisticMain extends JFrame {
 
 	ArrayList<JRadioButtonMenuItem> webCamButtonItems
 
@@ -53,44 +53,43 @@ class TrombisticFrame extends JFrame {
     	val prefs = Preferences.userNodeForPackage(this.class);
 
 		var menuBar = new JMenuBar()
-		var exitIcon = new ImageIcon("src/resources/exit.png")
 
-		var fileMenu = new JMenu("File")
+		var fileMenu = new JMenu("Fichier")
 		fileMenu.setMnemonic(KeyEvent::VK_F)
 
-		var loadMenuItem = new JMenuItem("Load excel file")
+		var loadMenuItem = new JMenuItem("Charger une liste d'étudiants (excel)")
 		loadMenuItem.setMnemonic(KeyEvent::VK_F2)
 		fileMenu.add(loadMenuItem)
 		loadMenuItem.addActionListener([ActionEvent e|ctrl.loadExcelCommand] as ActionListener)
 
-		var reloadMenuItem = new JMenuItem("Reload excel file")
+		var reloadMenuItem = new JMenuItem("Rafraîchir la liste")
 		reloadMenuItem.setMnemonic(KeyEvent::VK_F5)
 		fileMenu.add(reloadMenuItem)
 		reloadMenuItem.addActionListener([ActionEvent e|ctrl.reloadExcel] as ActionListener)
 
-		var saveHTMLItem = new JMenuItem("Export html")
+		var saveHTMLItem = new JMenuItem("Exporter le trombinoscope au format HTML")
 		saveHTMLItem.addActionListener(null)
 		saveHTMLItem.addActionListener([ActionEvent e|ctrl.exportHTML] as ActionListener)
 		fileMenu.add(saveHTMLItem)
 
-		var exitMenuItem = new JMenuItem("Exit", exitIcon)
+		var exitMenuItem = new JMenuItem("Quitter")
 		exitMenuItem.addActionListener([ ActionEvent e |
-			val res = JOptionPane.showConfirmDialog(null, "Quit for sure ?", "alert", JOptionPane.OK_CANCEL_OPTION);
+			val res = JOptionPane.showConfirmDialog(null, "Êtes-vous sûr ?", "alert", JOptionPane.OK_CANCEL_OPTION);
 			if (res == JFileChooser.APPROVE_OPTION) {
 				System.exit(0)
 			}
 		] as ActionListener)
 		fileMenu.add(exitMenuItem)
 
-		var optionsMenu = new JMenu("Option")
+		var optionsMenu = new JMenu("Options")
 		fileMenu.setMnemonic(KeyEvent::VK_W)
 
 		val webcams = Webcam.getWebcams()
 		if (webcams.empty) {
-			JOptionPane.showMessageDialog(null, "No webcam found on this computer", "alert", JOptionPane.OK_OPTION);
+			JOptionPane.showMessageDialog(null, "Pas de webcam trouvé sur cette machine, vérifier la connection USB", "alert", JOptionPane.OK_OPTION);
 			//System.exit(-1)
 		}
-		val webcamMenu = new JMenu("Select webcam");
+		val webcamMenu = new JMenu("Sélectionner la webcam à utiliser ");
 		optionsMenu.setMnemonic(KeyEvent.VK_O);
 		optionsMenu.add(webcamMenu);
 
@@ -108,14 +107,16 @@ class TrombisticFrame extends JFrame {
 			webcamGroup.add(webcamMenuItem);
 		}
 
-		var helpMenu = new JMenu("Help")
+		var helpMenu = new JMenu("Aide")
 		helpMenu.setMnemonic(KeyEvent::VK_H)
 
-		var aboutItem = new JMenuItem("About", exitIcon)
+		var aboutItem = new JMenuItem("About" )
 		aboutItem.setMnemonic(KeyEvent::VK_E)
-		aboutItem.setToolTipText("About Trombistic")
+		aboutItem.setToolTipText("A propos de Trombistic")
 		aboutItem.addActionListener([ ActionEvent e |
-			val lbl = new JLabel(new ImageIcon("src/main/java/fr/istic/trombistic/trombistic.png"));
+					//val lbl = new JLabel(ctrl.loadInternalImage("trombistic.png"));
+	
+			val lbl = new JLabel(new ImageIcon("src"+File.separator+"main"+File.separator+"java"+File.separator+"fr"+File.separator+"istic"+File.separator+"trombistic"+File.separator+"trombistic.png"));
 			JOptionPane.showMessageDialog(null, lbl, "À propos de Trombistic", JOptionPane.PLAIN_MESSAGE, null);
 		] as ActionListener)
 
@@ -134,9 +135,9 @@ class TrombisticFrame extends JFrame {
 
 	def static void main(String[] args) {
 		if (args.size==0)
-		new TrombisticFrame()
+		new TrombisticMain()
 		else
-		new TrombisticFrame(args.head)
+		new TrombisticMain(args.head)
 
 	}
 }

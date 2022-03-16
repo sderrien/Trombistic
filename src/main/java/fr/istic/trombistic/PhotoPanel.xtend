@@ -50,8 +50,8 @@ class PhotoPanel extends JPanel {
 		add(photoPanel)
 		
 		add(photo)
-		shootButton = new JButton("Shoot picture")
-		assignButton = new JButton("Import picture")
+		shootButton = new JButton("Prendre une photo")
+		assignButton = new JButton("Importer un fichier image")
 		add(shootButton)
 		add(assignButton)
 		disableShootButton
@@ -68,11 +68,7 @@ class PhotoPanel extends JPanel {
 
 	def setImage(String string) {
 		paneBorder.title = string
-		if ((new File(string).exists())) {
-			photo.image = string
-		} else {
-			photo.image = DEFAULT_PHOTO
-		}
+		photo.image = string
 	}
 
 }

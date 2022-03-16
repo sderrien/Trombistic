@@ -1,21 +1,26 @@
 package fr.istic.trombistic
 
 import com.github.sarxos.webcam.Webcam
-import java.io.File 
-import java.text.Normalizer
-import javax.swing.JOptionPane
-import java.awt.image.BufferedImage
-import javax.imageio.ImageIO
-import java.io.IOException
-import javax.swing.JFileChooser
 import com.github.sarxos.webcam.WebcamResolution
-import java.nio.file.Paths
+import java.awt.Graphics2D
+import java.awt.Image
+import java.awt.Toolkit
+import java.awt.image.BufferedImage
+import java.io.File
+import java.io.IOException
+import java.io.PrintStream
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
+import java.text.Normalizer
+import javax.imageio.ImageIO
+import javax.swing.ImageIcon
+import javax.swing.JFileChooser
+import javax.swing.JOptionPane
 
 class TrombisticControl {
-	TrombisticFrame mainFrame
+	TrombisticMain mainFrame
 	Webcam webcam
 	File workingPath
 	File excelFile;
@@ -26,7 +31,7 @@ class TrombisticControl {
 	PhotoPanel photoPanel
 	ExcelViewPanel excelView
 
-	new(TrombisticFrame mainFrame) {
+	new(TrombisticMain mainFrame) {
 		this.mainFrame = mainFrame
 		sheetId = 0
 		excelFile = null
@@ -76,7 +81,7 @@ class TrombisticControl {
 			}
 			photoPanel.setImage(photoFileNane)
 		} else {
-			JOptionPane::showMessageDialog(mainFrame, "No webcam available")
+			JOptionPane::showMessageDialog(mainFrame, "Pas de webcam connectée !")
 		}
 	}
 
@@ -86,45 +91,64 @@ class TrombisticControl {
 	}
 
 	def String buildSelectedPhotoFilePath() {
-		return workingPath + File.separator + "photos"+ File.separator  + buildPhotoFileName(model.getStringAt(sheetId,selectedRow, 0),model.getStringAt(sheetId,selectedRow, 1))
+		return workingPath + File.separator + "photos" + File.separator +
+			buildPhotoFileName(model.getStringAt(sheetId, selectedRow, 0), model.getStringAt(sheetId, selectedRow, 1))
 	}
 
 	def String buildPhotoFileName(String firstName, String secondName) {
-		return ('''«removeAccent(firstName)»_«removeAccent(secondName)».png'''.
-			toString).replace("'", "-")
+		return ('''«removeAccent(firstName)»_«removeAccent(secondName)».png'''.toString).replace("'", "-")
 	}
 
-	
 	def exportHTML() {
-		var PrettyPrint pp = new PrettyPrint()
-		val outFolder = new File(workingPath.absolutePath+File.separator+"html")
-		if (!outFolder.exists) {
-			outFolder.mkdirs()
-		}
-		val photoFolder = new File( outFolder.absolutePath + File.separator + "photos")
-		if (!photoFolder.exists) {
-			photoFolder.mkdirs()
-		}
-		println("Found "+model.getNumberOfUsefulRows(0)+" useful rows")
-		for (i:0..<model.getNumberOfUsefulRows(0)) {
-			val srcImage = workingPath + File.separator  + "photos"+ File.separator + buildPhotoFileName(model.getFirstName(i),model.getSecondName(i))
-			if (new File(srcImage).exists) {
-				val dstImage = photoFolder.absolutePath + File.separator + buildPhotoFileName(model.getFirstName(i),model.getSecondName(i))
-				val Path original = Paths.get(srcImage);
-    			val Path copy = Paths.get(dstImage);
-    			Files.copy(original, copy, StandardCopyOption.REPLACE_EXISTING);
+		try {
+			var PrettyPrint pp = new PrettyPrint()
+			val outFolder = new File(workingPath.absolutePath + File.separator + "html")
+			if (!outFolder.exists) {
+				outFolder.mkdirs()
 			}
+			val photoFolder = new File(outFolder.absolutePath + File.separator + "photos")
+			if (!photoFolder.exists) {
+				photoFolder.mkdirs()
+			}
+			println("Found " + model.getNumberOfUsefulRows(0) + " useful rows")
+
+			for (i : 0 ..< model.getNumberOfUsefulRows(0)) {
+				val srcImage = workingPath + File.separator + "photos" + File.separator +
+					buildPhotoFileName(model.getFirstName(i), model.getSecondName(i))
+				if (new File(srcImage).exists) {
+					val dstImage = photoFolder.absolutePath + File.separator +
+						buildPhotoFileName(model.getFirstName(i), model.getSecondName(i))
+					val Path original = Paths.get(srcImage);
+					val Path copy = Paths.get(dstImage);
+					Files.copy(original, copy, StandardCopyOption.REPLACE_EXISTING);
+				}
+			}
+
+			copyImage(loadInternalImage("aucun.png"), new File(photoFolder.absolutePath + File.separator + "aucun.png"))
+			pp.generate(outFolder, model, sheetId, 3)
+			JOptionPane::showMessageDialog(mainFrame, '''Sauvegarde du fichier HTML réussie.''')
+		} catch (Exception e) {
+			val ps = new PrintStream("trombistic_" + this.hashCode + ".log");
+			ps.append('''Error «e.message»''')
+			for (elt : e.stackTrace) {
+				ps.append(elt + "\n")
+			}
+			ps.close
+			JOptionPane::showMessageDialog(mainFrame, '''
+				Error during HTML export :
+				«e.message»
+			''')
 		}
-		pp.generate(outFolder, model, sheetId, 3)
-		JOptionPane::showMessageDialog(mainFrame, '''Export successful.''')
-		
+
 	}
 
 	def loadExcelCommand() {
 		var JFileChooser fileChooser = new JFileChooser("./")
-		fileChooser.setName("Select Excel 97 file (.xls)")
-		val excel97Filter = new FileTypeFilter(".xls", "Excel 97 files ");
-		fileChooser.addChoosableFileFilter(excel97Filter);
+		fileChooser.setName("Select Excel file (.xlsx)")
+		val excelFilter = new FileTypeFilter(".xlsx", "Excel files ");
+		for (f : fileChooser.choosableFileFilters)
+			fileChooser.removeChoosableFileFilter(f)
+		fileChooser.addChoosableFileFilter(excelFilter);
 		fileChooser.showOpenDialog(mainFrame)
 		excelFile = fileChooser.getSelectedFile()
 		loadExcel(excelFile)
@@ -134,17 +158,48 @@ class TrombisticControl {
 	def loadExcel(File excelFile) {
 		if (excelFile !== null && excelFile.exists) {
 			model = new ExcelModel(excelFile)
-			excelView.updateTable(model, sheetId);
+			try {
+				excelView.updateTable(model, sheetId);
+			} catch (RuntimeException exception) {
+				JOptionPane::showMessageDialog(mainFrame, '''Error «exception.message»'''.toString)
+			}
 			workingPath = new File(excelFile.absolutePath).parentFile
+			val photoPath = new File(workingPath + File.separator + "photos")
+			if (!photoPath.exists) {
+				photoPath.mkdirs
+			}
 			mainFrame.repaint
-		} 
+		}
+	}
+
+	def copyImage(Image img, File target) {
+		if (img!==null) {
+			val bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.SCALE_SMOOTH);
+	
+			val Graphics2D g2 = bi.createGraphics();
+			g2.drawImage(img, 0, 0, null);
+			g2.dispose();
+			ImageIO.write(bi, "png", target);
+		}
+	}
+
+	def Image loadInternalImage(String name) {
+		val classLoader = getClass().getClassLoader()
+		val imageURL = (classLoader).getResource("images" + File.separator + name);
+		println(imageURL.path+"  "+imageURL.protocol)
+		
+		if (imageURL !== null) {
+			val img = Toolkit.getDefaultToolkit().getImage(imageURL);
+			println(img)
+			return img;
+		} else {
+			null
+		}
 	}
 
 	def reloadExcel() {
 		if (excelFile !== null) {
-			model = new ExcelModel(excelFile)
-			excelView.updateTable(model, sheetId);
-			mainFrame.repaint
+			loadExcel(excelFile)
 		} else {
 			JOptionPane::showMessageDialog(mainFrame, '''Please select an Excel file first''')
 		}
@@ -153,7 +208,7 @@ class TrombisticControl {
 	def setPhotoPanel(PhotoPanel label) {
 		photoPanel = label
 	}
-	
+
 	def setExcelViewPanel(ExcelViewPanel label) {
 		this.excelView = label
 	}
@@ -177,17 +232,17 @@ class TrombisticControl {
 		val jpgFilter = new FileTypeFilter(".jpg,", "JPEG file");
 		fileChooser.addChoosableFileFilter(pngFilter);
 		fileChooser.addChoosableFileFilter(jpgFilter);
-		 fileChooser.showOpenDialog(mainFrame)
+		fileChooser.showOpenDialog(mainFrame)
 		val inFile = fileChooser.getSelectedFile()
 		if (inFile !== null) {
 			try {
 				val image = ImageIO::read(inFile)
 				ImageIO::write(image, "PNG", new File(photoFileNane))
- 				if ((new File(photoFileNane).exists())) { 
+				if ((new File(photoFileNane).exists())) {
 					photoPanel.setImage(photoFileNane)
- 				} else {
+				} else {
 					JOptionPane::showMessageDialog(mainFrame, '''Hmm something unexpected happened.''')
- 				}
+				}
 			} catch (IOException e2) {
 				JOptionPane::showMessageDialog(mainFrame, '''Could not read/save file «photoFileNane»'''.toString)
 			}

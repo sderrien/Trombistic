@@ -11,6 +11,7 @@ import javax.swing.JTable;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
+
 public class ExcelViewPanel extends JPanel {
 
 	private JScrollPane scrollPane;
@@ -56,14 +57,16 @@ public class ExcelViewPanel extends JPanel {
 	public void addListSelectionListener(ListSelectionListener listener) {
 		this.listener = listener;
 		table.getSelectionModel().addListSelectionListener(listener);
-	}  
+	}
 
-	public void updateTable(ExcelModel model, int sheetId)  {
+	public void updateTable(ExcelModel model, int sheetId) throws RuntimeException {
 		int nbRows = model.getNumberOfUsefulRows(sheetId);
 		int nbCols = model.getNumberOfUsefulColumns(sheetId);
+		if (nbRows<2) throw new RuntimeException("Fichier excel incomplet (contient seulement "+nbRows+" lignes)");
+		if (nbRows<4) throw new RuntimeException("Fichier excel incomplet (contient seulement "+nbCols+" colonnes)");
 		String[][] donnees = new String[nbRows][nbCols];
 		String[] entete = new String[nbCols];
-
+		 
 		System.out.println(nbCols + "X" + nbRows);
 		for (int col = 0; col < nbCols; col++) {
 			entete[col] = model.getStringAt(sheetId, 0, col);
