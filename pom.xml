@@ -18,11 +18,11 @@
 
      <repository>
       <id>openimaj-maven</id>
-      <url>http://maven.openimaj.org/</url>
+      <url>https://maven.openimaj.org/</url>
     </repository>
     <repository>
       <id>openimaj-snapshots</id>
-      <url>http://snapshots.openimaj.org/</url>
+      <url>https://snapshots.openimaj.org/</url>
     </repository>   <repository>
         <id>mavenCentral()</id>
         <url>https://maven.ecs.soton.ac.uk/content/groups/maven.openimaj.org/</url>
