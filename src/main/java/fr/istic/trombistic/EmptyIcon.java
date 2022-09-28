@@ -48,6 +48,7 @@ public final class EmptyIcon implements Icon {
   }
 
   public void paintIcon(Component c, Graphics g, int x, int y) {
+	  g.fillRect(x, x, x+width, y+height);
   }
 
 }

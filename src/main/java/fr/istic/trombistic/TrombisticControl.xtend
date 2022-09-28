@@ -18,6 +18,7 @@ import javax.imageio.ImageIO
 import javax.swing.ImageIcon
 import javax.swing.JFileChooser
 import javax.swing.JOptionPane
+import java.io.InputStream
 
 class TrombisticControl {
 	TrombisticMain mainFrame
@@ -100,16 +101,26 @@ class TrombisticControl {
 	}
 
 	def exportHTML() {
+		var PrettyPrint pp = new PrettyPrint()
+		var File photoFolder;
+		var File outFolder;
 		try {
-			var PrettyPrint pp = new PrettyPrint()
-			val outFolder = new File(workingPath.absolutePath + File.separator + "html")
+			outFolder = new File(workingPath.absolutePath + File.separator + "html")
 			if (!outFolder.exists) {
 				outFolder.mkdirs()
 			}
-			val photoFolder = new File(outFolder.absolutePath + File.separator + "photos")
+			photoFolder = new File(outFolder.absolutePath + File.separator + "photos")
 			if (!photoFolder.exists) {
 				photoFolder.mkdirs()
 			}
+		} catch (Exception e) {
+			JOptionPane::showMessageDialog(mainFrame, '''
+				Error (exception «e.toString») : could not open/create folder «workingPath.absolutePath + File.separator + "html" +File.separator + "photos"»  
+				«e.message»
+			''')
+			return;
+		}
+		try {
 			println("Found " + model.getNumberOfUsefulRows(0) + " useful rows")
 
 			for (i : 0 ..< model.getNumberOfUsefulRows(0)) {
@@ -120,25 +131,59 @@ class TrombisticControl {
 						buildPhotoFileName(model.getFirstName(i), model.getSecondName(i))
 					val Path original = Paths.get(srcImage);
 					val Path copy = Paths.get(dstImage);
-					Files.copy(original, copy, StandardCopyOption.REPLACE_EXISTING);
+					try {
+						Files.copy(original, copy, StandardCopyOption.REPLACE_EXISTING);
+					} catch (Exception e) {
+						dumpException(e)
+						JOptionPane::
+							showMessageDialog(mainFrame, '''Error «e.toString»\nCould not copy «original» to «copy».''')
+						return
+					}
 				}
 			}
 
-			copyImage(loadInternalImage("aucun.png"), new File(photoFolder.absolutePath + File.separator + "aucun.png"))
-			pp.generate(outFolder, model, sheetId, 3)
-			JOptionPane::showMessageDialog(mainFrame, '''Sauvegarde du fichier HTML réussie.''')
-		} catch (Exception e) {
-			val ps = new PrintStream("trombistic_" + this.hashCode + ".log");
-			ps.append('''Error «e.message»''')
-			for (elt : e.stackTrace) {
-				ps.append(elt + "\n")
+			try {
+				val name = "aucun.png";
+				// val InputStream is = this.class.getResourceAsStream("images"+File.separator +name);
+				// this is the path within the jar file
+				var InputStream input = this.class.getResourceAsStream("/resources/" + name);
+				if (input === null) {
+					// this is how we load file within editor (eg eclipse)
+					input = this.class.getClassLoader().getResourceAsStream(name);
+				}
+
+				if (input !== null) {
+					copy(input, photoFolder.absolutePath + File.separator + name)
+
+				}
+			} catch (Exception e) {
+				JOptionPane::showMessageDialog(mainFrame, '''Erreur dans la copie du fichier aucun.png.''')
+				dumpException(e)
 			}
-			ps.close
+			try {
+				pp.generate(outFolder, model, sheetId, 3)
+				JOptionPane::showMessageDialog(mainFrame, '''Sauvegarde du fichier HTML réussie.''')
+			} catch (Exception e) {
+				dumpException(e)
+			}
+		} catch (Exception e) {
+			dumpException(e)
 			JOptionPane::showMessageDialog(mainFrame, '''
-				Error during HTML export :
+				Error (execption «e.toString») during HTML export :
 				«e.message»
 			''')
+
 		}
+
+	}
+
+	def dumpException(Exception e) {
+		val ps = new PrintStream("trombistic_" + this.hashCode + ".log");
+		ps.append('''Error «e.toString» : «e.message»''')
+		for (elt : e.stackTrace) {
+			ps.append(elt + "\n")
+		}
+		ps.close
 
 	}
 
@@ -172,29 +217,20 @@ class TrombisticControl {
 		}
 	}
 
-	def copyImage(Image img, File target) {
-		if (img!==null) {
-			val bi = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.SCALE_SMOOTH);
-	
-			val Graphics2D g2 = bi.createGraphics();
-			g2.drawImage(img, 0, 0, null);
-			g2.dispose();
-			ImageIO.write(bi, "png", target);
-		}
-	}
+	def public static boolean copy(InputStream source, String destination) {
+		val boolean succeess = true;
 
-	def Image loadInternalImage(String name) {
-		val classLoader = getClass().getClassLoader()
-		val imageURL = (classLoader).getResource("images" + File.separator + name);
-		println(imageURL.path+"  "+imageURL.protocol)
-		
-		if (imageURL !== null) {
-			val img = Toolkit.getDefaultToolkit().getImage(imageURL);
-			println(img)
-			return img;
-		} else {
-			null
+		System.out.println("Copying ->" + source + "\n\tto ->" + destination);
+
+		try {
+			Files.copy(source, Paths.get(destination), StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException ex) {
+//            logger.log(Level.WARNING, "", ex);
+//            succeess = false;
 		}
+
+		return succeess;
+
 	}
 
 	def reloadExcel() {

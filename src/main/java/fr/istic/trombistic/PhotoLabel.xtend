@@ -16,92 +16,126 @@ import java.util.List
 import org.openimaj.math.geometry.shape.Rectangle
 import java.awt.Color
 import java.awt.Toolkit
+import javax.imageio.ImageIO
+import java.awt.image.BufferedImage
+import java.awt.Graphics2D
 
 class PhotoLabel extends JLabel {
+	
 	String photo
-	int w
-	int h
-	int offset_x
-	int offset_y
-	Image scaledImage
+	int labelWidth
+	int labelHeight
+	int user_offset_x
+	BufferedImage scaledImage
 
 	Rectangle boundaries
+	Rectangle cropped
+	
+	float user_scale =1
 
 	new(int w, int h) {
-		this.w = w
-		this.h = h
-		offset_x = 0
-		offset_y = 0
+		this.labelWidth = w
+		this.labelHeight = h
+		user_offset_x =0
 		setSize(w, h)
 		setIcon(new EmptyIcon(w, h))
 	}
 
-	def void setImage(String filename) {
-		try {
-		if (new File(filename).exists()) {
-			// Add your image here
-			photo = filename
-			var ImageIcon icon = new ImageIcon(photo)
-			var int img_h = icon.getIconHeight()
-			var int img_w = icon.getIconWidth()
-			val imgAspectRatio = (1.0 * img_w) / img_h
-			val targetAspectRatio = (1.0 * w) / h
-
-			val MBFImage image = ImageUtilities.readMBF(new File(photo))
-			val FaceDetector<DetectedFace, FImage> fd = new HaarCascadeDetector(200)
-			val List<DetectedFace> faces = fd.detectFaces(Transforms.calculateIntensity(image))
-			if (!faces.empty) {
-				boundaries = faces.head.getBounds()
-			} else {
-				boundaries = null
-			}
-
-			if (imgAspectRatio > targetAspectRatio) {
-				var int height = (1 / imgAspectRatio * w) as int
-				var int width = w;
-				offset_x = 0
-				offset_y = (h - height) / 2
-				println('''Scale «img_w»x«img_h» for «w»x«h» -> «width»x«height» offset «offset_x»,«offset_y»''')
-				scaledImage = icon.getImage().getScaledInstance(w, height, Image::SCALE_DEFAULT)
-				if (boundaries !== null) {
-					boundaries.scale(((1.0 * w) / img_w).floatValue)
-				}
-			} else {
-
-				var int width = (1 / imgAspectRatio * h) as int
-				var int height = h;
-				offset_x = (w - width) / 2
-				offset_y = 0
-
-				println('''Scale «img_w»x«img_h» for «w»x«h» -> «width»x«height» offset «offset_x»,«offset_y»''')
-				scaledImage = icon.getImage().getScaledInstance(width, height, Image::SCALE_DEFAULT)
-				if (boundaries !== null) {
-					boundaries.scale(((1.0 * h) / img_h).floatValue)
-				}
-			}
-			icon.setImage(scaledImage)
-			setIcon(icon)
+	def extractFaceBoundaries() {
+		val MBFImage image = ImageUtilities.readMBF(new File(photo))
+		val FaceDetector<DetectedFace, FImage> fd = new HaarCascadeDetector(200)
+		val List<DetectedFace> faces = fd.detectFaces(Transforms.calculateIntensity(image))
+		if (!faces.empty) {
+			faces.head.getBounds()
 		} else {
-			var ImageIcon icon = new ImageIcon(photo)
-			val imageURL = getClass().getClassLoader().getResource("images" + File.separator + name);
-			if (imageURL !== null) {
-				val img = Toolkit.getDefaultToolkit().getImage(imageURL);
-				icon.setImage(img)
-			}
+			new Rectangle(0,0,image.width-1,image.height-1)
 		}
-			
-		} catch (Exception exception) {
-			
-		}
+	}
+
+def static BufferedImage toBufferedImage(Image img)
+{
+    if (img instanceof BufferedImage)
+    {
+        return img;
+    }
+
+    // Create a buffered image with transparency
+    val BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+
+    // Draw the image on to the buffered image
+    val bGr = bimage.createGraphics();
+    bGr.drawImage(img, 0, 0, null);
+    
+
+    // Return the buffered image
+    return bimage;
+}
+
+	def void setImage(String filename) {
+		photo = filename
+		updateImage
 	}
 
 	override void paint(Graphics g) {
-		// super.paint(g)
-		g.drawImage(scaledImage, 0, 0, this)
-		if (boundaries !== null) {
-			g.setColor(Color.green)
-			g.drawRect(boundaries.topLeft.x.intValue, boundaries.topLeft.y.intValue, boundaries.width.intValue,
-				boundaries.height.intValue)
+		val g2d =  g as Graphics2D;
+		super.paint(g)
+		val photoFile = new File(photo)
+		if (photoFile.exists) {
+			val BufferedImage img = ImageIO.read(photoFile);
+			val viewScale = (labelWidth+0.0f)/img.width
+			scaledImage = img
+			.getScaledInstance(
+					labelWidth, 
+					(viewScale*img.height).intValue, 
+					Image::SCALE_DEFAULT
+			).toBufferedImage;
+			
+			g2d.drawImage(scaledImage, 0, 0, this)
+			val img_offset_x =  (user_offset_x/200.0*scaledImage.width).intValue
+			g2d.color = (new Color(0, 255, 0));
+			
+			g2d.drawRect(img_offset_x,0,scaledImage.width-2*img_offset_x,scaledImage.height)
+		} else {
+			g2d.setPaint(new Color(150, 150, 150));
+			g2d.fillRect(0,0,labelWidth,labelHeight)
 		}
+			
 	}
+	
+	def setOffset(int i) {
+		user_offset_x=i
+		println('''Change offset ''')
+		updateImage
+	}
+	
+	def setScale(int i) {
+		user_scale = i/100.0f
+		println('''Change scale ''')
+		updateImage
+	}
+	
+	def updateImage() {
+		println('''Update Image ''')
+		val photoFile = new File(photo)
+		if (photoFile.exists) {
+			val BufferedImage img = ImageIO.read(photoFile);
+			println('''Image «img.width»x«img.height» [«photo»]''')
+			val img_offset_x =  (user_offset_x/200.0*img.width).intValue
+			val BufferedImage cropped = img.getSubimage(img_offset_x, 0, img.width-2*img_offset_x, img.height);
+			scaledImage = cropped
+			.getScaledInstance(
+					(user_scale*cropped.width).intValue, 
+					(user_scale*cropped.height).intValue, 
+					Image::SCALE_DEFAULT
+			).toBufferedImage;
+			println('''Image «scaledImage.width»x«scaledImage.height» [«photo»]''')
+			val newfileName = photo.replace(".png","_scaled.png")
+			ImageIO.write(scaledImage,"png", new File(newfileName))
+		} else {
+			scaledImage = null
+		}
+		repaint
+		
+	}
+	
 }
